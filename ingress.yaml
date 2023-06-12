@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: registry-docker-registry
+  namespace: docker-registry
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+spec:
+  defaultBackend:
+    service:
+      name: registry-docker-registry
+      port:
+        number: 5000
+  ingressClassName: nginx
+  rules:
+    - host: private.registry
+      http:
+        paths:
+          - backend:
+              service:
+                name: registry-docker-registry
+                port:
+                  number: 5000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - private.registry
+      secretName: registry-cert

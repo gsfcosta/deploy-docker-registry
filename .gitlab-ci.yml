@@ -1,0 +1,53 @@
+stages:
+  - deployment
+  - ingress
+  - pvc
+  - service
+
+deployment_job:
+  stage: deployment
+  image:
+    name: private.registry/bitnami/kubectl:latest
+    entrypoint: ['']
+  script:
+    - export KUBECONFIG=/config.yaml
+    - kubectl apply -f deployment.yaml
+  only:
+    changes:
+      - deployment.yaml
+    
+ingress_job:
+  stage: ingress
+  image:
+    name: private.registry/bitnami/kubectl:latest
+    entrypoint: ['']
+  script:
+    - export KUBECONFIG=/config.yaml
+    - kubectl apply -f ingress.yaml
+  only:
+    changes:
+      - ingress.yaml
+          
+pvc_job:
+  stage: pvc
+  image:
+    name: private.registry/bitnami/kubectl:latest
+    entrypoint: ['']
+  script:
+    - export KUBECONFIG=/config.yaml
+    - kubectl apply -f pvc.yaml
+  only:
+    changes:
+      - pvc.yaml
+
+service_job:
+  stage: service
+  image:
+    name: private.registry/bitnami/kubectl:latest
+    entrypoint: ['']
+  script:
+    - export KUBECONFIG=/config.yaml
+    - kubectl apply -f service.yaml
+  only:
+    changes:
+      - service.yaml

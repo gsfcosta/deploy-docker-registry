@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry-docker-registry
+  namespace: docker-registry
+  labels:
+    app: "docker-registry"
+    chart: "docker-registry-2.2.2"
+    release: "registry"
+    heritage: "Helm"
+spec:
+  selector:
+    matchLabels:
+      app: docker-registry
+      release: registry
+  replicas: 1
+  strategy:
+    type: Recreate
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: docker-registry
+        release: registry
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: docker-registry
+          image: "registry:2.8.1"
+          imagePullPolicy: IfNotPresent
+          command:
+          - /bin/registry
+          - serve
+          - /etc/docker/registry/config.yml
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+          env:
+            - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+              value: /var/lib/registry
+          volumeMounts:             
+            - mountPath: /etc/docker/registry
+              name: registry-docker-registry-config
+            - mountPath: /var/lib/registry/
+              name: data
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: registry-docker-registry-config
+          name: registry-docker-registry-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: registry-docker-registry
+            
